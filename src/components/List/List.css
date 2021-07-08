@@ -1,0 +1,47 @@
+.list {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    margin: 0;
+    padding: 0.5em 0;
+    border: 0.01em solid #222;
+    background: #f8f8f8;
+    list-style: none;
+}
+
+.list__item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1em 0.4em 1em;
+    margin: 0 0 0.4em 0;
+}
+
+.list__item:not(:last-child) {
+    border-bottom: 0.01em solid #222;
+}
+
+.list__text {
+    margin: 0;
+}
+
+.list__delete-button {
+    margin: 0 0 0 1em;
+    opacity: 0.9;
+    transition: opacity 0.3s ease-in-out;
+    cursor: pointer;
+    user-select: none;
+}
+
+.list__delete-button path {
+    fill: #333;
+    transition: fill 0.2s ease-in-out;
+}
+
+.list__delete-button:hover path {
+    fill: #222;
+}
+
+.list__delete-button:hover {
+    opacity: 1;
+}
