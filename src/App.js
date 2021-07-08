@@ -4,6 +4,7 @@ import React from 'react';
 import OrbitControls from 'three-orbitcontrols';
 import * as THREE from 'three';
 
+import useStaticRefCurrentGetter from 'hooks/useStaticRefCurrentGetter';
 import List from 'components/List/List';
 
 import {
@@ -12,16 +13,6 @@ import {
   useCallback,
   useState,
 } from 'react';
-
-let camera, scene, renderer;
-let objects = [];
-
-const materialOptions = {
-  color: new THREE.Color('#ffb759'),
-  flatShading: false,
-};
-
-const material = new THREE.MeshPhysicalMaterial(materialOptions);
 
 const shapes = {
   CUBE: 'CUBE',
@@ -39,23 +30,52 @@ const geometryCreators = {
   [shapes.CUBE]:  (size) => new THREE.BoxGeometry(size, size, size),
   [shapes.SPHERE]: (size) => new THREE.SphereGeometry( size / 2, size * 128, size * 128 ),
   [shapes.CYLINDER]: (size) =>  new THREE.CylinderGeometry( size / 4, size / 4, size, size * 128),
-}
+};
 
 function App() {
-
   const containerRef = useRef();
 
+  const cameraRef = useRef(null);
+  const sceneRef = useRef(null);
+  const rendererRef = useRef(null);
+  const defaultMaterialRef = useRef(null)
+
+  const getContainer = useStaticRefCurrentGetter(
+    containerRef,
+    () => null,
+  );
+
+  const getCamera = useStaticRefCurrentGetter(
+    cameraRef, 
+    () => initCamera(getContainer()),
+  );
+  
+  const getScene = useStaticRefCurrentGetter(
+    sceneRef,
+    () => initScene(),
+  );
+
+  const getRenderer = useStaticRefCurrentGetter(
+    rendererRef,
+    () => initRenderer(getContainer(), getCamera(), getScene()),
+  );
+
+  const getDefaultMaterial = useStaticRefCurrentGetter(
+    defaultMaterialRef,
+    () => initDefaultMaterial(),
+  );
+  
   const [size, setSize] = useState(0.1);
   const [shape, setShape] = useState(shapes.CUBE);
-  const [objects, setObjects] = useState([]);
+  const [items, setItems] = useState([]);
 
   useEffect(
-    () => initTree(containerRef.current),
+    () => initTree(getContainer(), getCamera(), getScene()),
     [],
   );
 
   const onCreateButtonClickHandler = useCallback(
-    () => createNewObject(shape, size, setObjects),
+    () => createNewObject(shape, size, getScene(), getDefaultMaterial(), updateItems),
     [shape, size],
   );
 
@@ -65,14 +85,27 @@ function App() {
   );
 
   const onShapeSelectChange = useCallback(
-    (event) => setShape(event.target.value),
+    (event) => handleOnShapeSelect(event, setShape),
     [setShape],
   );
 
   const onDeleteButtonClickHandler = useCallback(
-    (event, id) => handleDeleteObject(event, id, setObjects),
+    (event, id) => handleDeleteObject(id, getScene(), updateItems),
     [],
   );
+
+  function updateItems() {
+    const scene = getScene();
+
+    const items = scene.children
+      .filter(child => child instanceof  THREE.Mesh)
+      .map(object => ({
+        id: object.id,
+        text: object.uuid,
+      }));
+
+    setItems(items);
+  }
 
   return (
     <div className="app">
@@ -89,7 +122,7 @@ function App() {
         </select>
         <button onClick={onCreateButtonClickHandler}>create</button>
       {/*</form>*/}
-      <List className={'app__list'}   onDeleteButtonClick={onDeleteButtonClickHandler}/>
+      <List className={'app__list'} items={items}  onDeleteButtonClick={onDeleteButtonClickHandler}/>
       <div className="app__tree-container" ref={containerRef}/>
     </div>
   );
@@ -99,21 +132,18 @@ function handleOnShapeSelect(event, setShape) {
   setShape(event.target.value);
 }
 
-function handleDeleteObject(event, id, setObjects) {
-  console.log('uuid', id)
-  setObjects(prevState => ([
-    ...prevState.filter(object => object.id !== id),
-  ]));
-
-  const object = objects.find(o => o.uuid === id);
+function handleDeleteObject(id, scene, updateItems) {
+  const object = scene.getObjectById(id);
 
   scene.remove(object);
+
+  updateItems();
 }
 
-function createNewObject(shape, size, setObjects) {
+function createNewObject(shape, size, scene, material, updateItems) {
 
   const createGeometry = geometryCreators[shape];
-  console.log('createGeometry', createGeometry)
+
   if (!createGeometry) return;
 
   const object = new THREE.Mesh(
@@ -123,28 +153,31 @@ function createNewObject(shape, size, setObjects) {
 
   setRandomPosition(object);
 
-  objects.push(object);
   scene.add(object);
 
-  setObjects(prevState => ([
-    ...prevState,
-    {
-      id: object.uuid,
-      text: object.uuid,
-    },
-  ]));
+  updateItems();
 }
 
-function initTree(container) {
-  const
-    width = container.offsetWidth,
-    height = container.offsetHeight,
-    aspect = width / height;
+function initDefaultMaterial() {
+  const materialOptions = {
+    color: new THREE.Color('#ffb759'),
+    flatShading: false,
+  };
 
-  camera = new THREE.PerspectiveCamera( 70, aspect, 0.01, 10 );
+  return new THREE.MeshPhysicalMaterial(materialOptions);
+}
+
+function initCamera(container) {
+  const dimensions = getContainerDimensions(container);
+
+  const camera = new THREE.PerspectiveCamera( 70, dimensions.aspect, 0.01, 10 );
   camera.position.z = 1;
 
-  scene = new THREE.Scene();
+  return camera;
+}
+
+function initScene() {
+  const scene = new THREE.Scene();
   scene.background = new THREE.Color('skyblue');
 
   const baseLight = new THREE.AmbientLight( '#fefff0' );
@@ -159,12 +192,16 @@ function initTree(container) {
   scene.add( hemisphereLight );
   scene.add( mainPointLight );
 
-  renderer = new THREE.WebGLRenderer({
-    antialias: true,
-  });
+  return scene;
+}
 
-  renderer.setSize( width, height );
-  renderer.setAnimationLoop( animation );
+function initRenderer(container, camera, scene) {
+  const dimensions = getContainerDimensions(container);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+
+  renderer.setSize( dimensions.width, dimensions.height );
+  renderer.setAnimationLoop( getAnimation(camera, scene, renderer) );
 
   container.appendChild( renderer.domElement );
 
@@ -172,13 +209,22 @@ function initTree(container) {
   controls.update();
 }
 
-function animation(time) {
-  objects.forEach(o => {
-    // o.rotation.x = time / 2000;
-    // o.rotation.y = time / 1000;
-  })
+function initTree(container, camera, scene) {
+  initRenderer(container, camera, scene);
+}
 
-  renderer.render( scene, camera );
+function getAnimation(camera, scene, renderer) {
+  return function animation() {
+    renderer.render( scene, camera );
+  }
+}
+
+function getContainerDimensions(container) {
+  return {
+    width: container.offsetWidth,
+    height: container.offsetHeight,
+    aspect: container.offsetWidth / container.offsetHeight,
+  };
 }
 
 function setRandomPosition(object) {
