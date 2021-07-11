@@ -27,12 +27,13 @@ const options = [
 ];
 
 const geometryCreators = {
-  [shapes.CUBE]:  (size) => new THREE.BoxGeometry(size, size, size),
-  [shapes.SPHERE]: (size) => new THREE.SphereGeometry( size / 2, size * 128, size * 128 ),
-  [shapes.CYLINDER]: (size) =>  new THREE.CylinderGeometry( size / 4, size / 4, size, size * 128),
+  [shapes.CUBE]:  (scale) => new THREE.BoxGeometry(scale, scale, scale),
+  [shapes.SPHERE]: (scale) => new THREE.SphereGeometry( scale / 2, scale * 128, scale * 128 ),
+  [shapes.CYLINDER]: (scale) =>  new THREE.CylinderGeometry( scale / 4, scale / 4, scale, scale * 128),
 };
 
 function App() {
+
   const containerRef = useRef();
 
   const cameraRef = useRef(null);
@@ -65,7 +66,7 @@ function App() {
     () => initDefaultMaterial(),
   );
   
-  const [size, setSize] = useState(0.1);
+  const [scale, setScale] = useState(1);
   const [shape, setShape] = useState(shapes.CUBE);
   const [items, setItems] = useState([]);
 
@@ -75,12 +76,12 @@ function App() {
   );
 
   const onCreateButtonClickHandler = useCallback(
-    () => createNewObject(shape, size, getScene(), getDefaultMaterial(), updateItems),
-    [shape, size],
+    () => createNewObject(shape, scale, getScene(), getDefaultMaterial(), updateItems),
+    [shape, scale],
   );
 
-  const onSizeInputChangeHandler = useCallback(
-    (event) => setSize(event.target.value),
+  const onScaleInputChangeHandler = useCallback(
+    (event) => setScale(event.target.value),
     [],
   );
 
@@ -110,7 +111,7 @@ function App() {
   return (
     <div className="app">
       {/*<form action="#">*/}
-        <input type="text" name={'size'} value={size} onChange={onSizeInputChangeHandler}/>
+        <input type="text" name={'scale'} value={scale} onChange={onScaleInputChangeHandler}/>
         <select name="shape" value={shape} onChange={onShapeSelectChange}>
           {
             options.map(option => {
@@ -140,16 +141,18 @@ function handleDeleteObject(id, scene, updateItems) {
   updateItems();
 }
 
-function createNewObject(shape, size, scene, material, updateItems) {
+function createNewObject(shape, scale, scene, material, updateItems) {
 
   const createGeometry = geometryCreators[shape];
 
   if (!createGeometry) return;
 
   const object = new THREE.Mesh(
-    createGeometry(size),
+    createGeometry(0.1),
     material,
   );
+
+  object.scale.set(scale, scale, scale);
 
   setRandomPosition(object);
 
@@ -230,7 +233,7 @@ function getContainerDimensions(container) {
 function setRandomPosition(object) {
   object.position.x = getRandomInRange(-0.5, 0.5);
   object.position.y = getRandomInRange(-0.5, 0.5);
-  object.position.z = getRandomInRange(-0.2, 0.2);
+  object.position.z = getRandomInRange(-0.5, 0.5);
 }
 
 function getRandomInRange(min, max) {
