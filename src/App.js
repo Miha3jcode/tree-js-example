@@ -1,11 +1,14 @@
-import './App.css';
+import './App.scss';
 
 import React from 'react';
-import OrbitControls from 'three-orbitcontrols';
 import * as THREE from 'three';
+import OrbitControls from 'three-orbitcontrols';
 
 import useStaticRefCurrentGetter from 'hooks/useStaticRefCurrentGetter';
 import List from 'components/List/List';
+import Button from 'components/Button/Button';
+import Input from 'components/Input/Input';
+import Select from 'components/Select/Select';
 
 import {
   useRef,
@@ -27,9 +30,14 @@ const options = [
 ];
 
 const geometryCreators = {
-  [shapes.CUBE]:  (scale) => new THREE.BoxGeometry(scale, scale, scale),
-  [shapes.SPHERE]: (scale) => new THREE.SphereGeometry( scale / 2, scale * 128, scale * 128 ),
-  [shapes.CYLINDER]: (scale) =>  new THREE.CylinderGeometry( scale / 4, scale / 4, scale, scale * 128),
+  [shapes.CUBE]: (scale) =>
+    new THREE.BoxGeometry(scale, scale, scale),
+
+  [shapes.SPHERE]: (scale) =>
+    new THREE.SphereGeometry( scale / 2, scale * 128, scale * 128 ),
+
+  [shapes.CYLINDER]: (scale) =>
+    new THREE.CylinderGeometry( scale / 4, scale / 4, scale, scale * 128),
 };
 
 function App() {
@@ -76,7 +84,7 @@ function App() {
   );
 
   const onCreateButtonClickHandler = useCallback(
-    () => createNewObject(shape, scale, getScene(), getDefaultMaterial(), updateItems),
+    (event) => handleCreateButtonClick(event, shape, scale, getScene(), getDefaultMaterial(), updateItems),
     [shape, scale],
   );
 
@@ -110,9 +118,8 @@ function App() {
 
   return (
     <div className="app">
-      {/*<form action="#">*/}
-        <input type="text" name={'scale'} value={scale} onChange={onScaleInputChangeHandler}/>
-        <select name="shape" value={shape} onChange={onShapeSelectChange}>
+      <form className={'app__form'} action="#">
+        <Select className={'app__field'} name="shape" value={shape} onChange={onShapeSelectChange}>
           {
             options.map(option => {
               return  (
@@ -120,13 +127,19 @@ function App() {
               );
             })
           }
-        </select>
-        <button onClick={onCreateButtonClickHandler}>create</button>
-      {/*</form>*/}
+        </Select>
+        <Input className={'app__field'} type="text" name={'scale'} value={scale} onChange={onScaleInputChangeHandler}/>
+        <Button className={'app__field'} onClick={onCreateButtonClickHandler}>create</Button>
+      </form>
       <List className={'app__list'} items={items}  onDeleteButtonClick={onDeleteButtonClickHandler}/>
       <div className="app__tree-container" ref={containerRef}/>
     </div>
   );
+}
+
+function handleCreateButtonClick(event, shape, scale, scene, material, updateItems) {
+  event.preventDefault();
+  createNewObject(shape, scale, scene, material, updateItems)
 }
 
 function handleOnShapeSelect(event, setShape) {

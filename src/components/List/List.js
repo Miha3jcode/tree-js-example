@@ -1,4 +1,4 @@
-import './List.css';
+import './List.scss';
 import React from 'react';
 import PropTypes from 'prop-types';
 import {ReactComponent as CloseSvg} from 'svgs/close.svg';

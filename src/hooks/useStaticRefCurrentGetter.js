@@ -3,7 +3,6 @@ import {
 } from 'react';
 
 export default function useStaticRefCurrentGetter(ref, initialize) {
-  console.log(ref, initialize)
   return useCallback(
     () => getCurrent(ref, initialize),
     [],
