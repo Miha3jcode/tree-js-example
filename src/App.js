@@ -79,7 +79,7 @@ function App() {
   const [items, setItems] = useState([]);
 
   useEffect(
-    () => initTree(getContainer(), getCamera(), getScene()),
+    () => handleInitTreeEffect(getContainer(), getCamera(), getScene()),
     [],
   );
 
@@ -93,7 +93,7 @@ function App() {
     [],
   );
 
-  const onShapeSelectChange = useCallback(
+  const onShapeSelectChangeHandler = useCallback(
     (event) => handleOnShapeSelect(event, setShape),
     [setShape],
   );
@@ -119,7 +119,7 @@ function App() {
   return (
     <div className="app">
       <form className={'app__form'} action="#">
-        <Select className={'app__field'} name="shape" value={shape} onChange={onShapeSelectChange}>
+        <Select className={'app__field'} name="shape" value={shape} onChange={onShapeSelectChangeHandler}>
           {
             options.map(option => {
               return  (
@@ -135,6 +135,12 @@ function App() {
       <div className="app__tree-container" ref={containerRef}/>
     </div>
   );
+}
+
+function handleInitTreeEffect(container, camera, scene) {
+  if (container.children.length) return;
+
+  initTree(container, camera, scene);
 }
 
 function handleCreateButtonClick(event, shape, scale, scene, material, updateItems) {
