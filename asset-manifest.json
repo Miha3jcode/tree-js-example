@@ -1,0 +1,23 @@
+{
+  "files": {
+    "main.css": "//tree-js-example/static/css/main.63cf6c63.chunk.css",
+    "main.js": "//tree-js-example/static/js/main.688f3f91.chunk.js",
+    "main.js.map": "//tree-js-example/static/js/main.688f3f91.chunk.js.map",
+    "runtime-main.js": "//tree-js-example/static/js/runtime-main.0b427436.js",
+    "runtime-main.js.map": "//tree-js-example/static/js/runtime-main.0b427436.js.map",
+    "static/js/2.1bc2bd58.chunk.js": "//tree-js-example/static/js/2.1bc2bd58.chunk.js",
+    "static/js/2.1bc2bd58.chunk.js.map": "//tree-js-example/static/js/2.1bc2bd58.chunk.js.map",
+    "static/js/3.42564b6b.chunk.js": "//tree-js-example/static/js/3.42564b6b.chunk.js",
+    "static/js/3.42564b6b.chunk.js.map": "//tree-js-example/static/js/3.42564b6b.chunk.js.map",
+    "index.html": "//tree-js-example/index.html",
+    "static/css/main.63cf6c63.chunk.css.map": "//tree-js-example/static/css/main.63cf6c63.chunk.css.map",
+    "static/js/2.1bc2bd58.chunk.js.LICENSE.txt": "//tree-js-example/static/js/2.1bc2bd58.chunk.js.LICENSE.txt",
+    "static/media/close.9157cf20.svg": "//tree-js-example/static/media/close.9157cf20.svg"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.0b427436.js",
+    "static/js/2.1bc2bd58.chunk.js",
+    "static/css/main.63cf6c63.chunk.css",
+    "static/js/main.688f3f91.chunk.js"
+  ]
+}
